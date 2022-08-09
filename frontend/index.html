@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveScan</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-fixed-top navbar-dark bg-dark ">
+        <a class="navbar-brand" href="#">WaveScan</a>
+    </nav>
+
+    <div class="container-fluid" id="userForm">
+        <div class="form-holder">
+            <div class="form-group">
+                <label for="projectName">Project Name</label>
+                <input type="text" class="form-control" id="projectName" v-model="projectName" placeholder="My_Project">
+            </div>
+
+            <div class="form-group">
+                <label for="scanningMode">Scanning Mode</label>
+                <select class="form-select" id="scanningMode" v-model="scanningMode">
+                    <option>GANTRY</option>
+                    <option>CRAWLER</option>
+                    <option>AUTO</option>
+                    <option>MANUAL</option>
+                    <option>ARM</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="scanDimensions">Scan Dimensions (cm)</label>
+                <div class="form-group row">
+                    <label for="scanDimensionsX" class="col-sm-1 col-form-label">X</label>
+                    <div class="col-sm-5">
+                        <input type="number" class="form-control" id="scanDimensionsX" v-model="scanDimensionsX" placeholder="40">
+                    </div>
+                    <label for="scanDimensionsY" class="col-sm-1 col-form-label">Y</label>
+                    <div class="col-sm-5">
+                        <input type="number" class="form-control" id="scanDimensionsY" v-model="scanDimensionsY" placeholder="40">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="scannerFrequency">Scanner Frequency (GHz)</label>
+                <input type="number" class="form-control" id="scannerFrequency" v-model="scannerFrequency" placeholder="58.5">
+            </div>
+            <button type="submit" class="btn-lg" v-on:click="validate()">SCAN</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/vue@next"></script>
+
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return{
+                    projectName: "",
+                    scanningMode: "GANTRY",
+                    scanDimensionsX: 0,
+                    scanDimensionsY: 0,
+                    scannerFrequency: 0
+                }
+                
+            },
+
+            methods: {
+                validate() {
+                    userData = {
+                        "projectName": this.projectName,
+                        "scanningMode": this.scanningMode,
+                        "scanDimensionsX": this.scanDimensionsX,
+                        "scanDimensionsY": this.scanDimensionsY,
+                        "scannerFrequency": this.scannerFrequency
+                    };
+
+                    userData = JSON.stringify(userData);
+
+                    (async () => {
+                    const rawResponse = await fetch('https://wavescan-validation.herokuapp.com/validate', {
+                        method: 'POST',
+                        headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                        },
+                        body: userData
+                    });
+                    const content = await rawResponse.json();
+                    console.log(content);
+
+                    if (content["code"] == 200) {
+                        (async () => {
+                        const rawResponse = await fetch('https://wavescan-validation.herokuapp.com/success', {
+                        method: 'GET',
+                        headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                        }
+                        });
+
+                        const data = await rawResponse.json();
+                        console.log(data);
+                        localStorage.setItem("link", data["link"])
+                        window.location.assign("scanner.html")
+                        return false
+                        })();
+                    }
+                    else {
+                        localStorage.setItem("error", content["message"])
+                        window.location.assign("error.html")
+                    }
+                    })();
+
+                }
+            }
+        })
+
+        app.mount("#userForm")
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>
