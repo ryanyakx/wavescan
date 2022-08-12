@@ -1,4 +1,4 @@
 # wavescan
-#sitelink - frontend: https://ryanyakx.github.io/wavescan-frontend/ 
-#sitelink - backend-form(post): https://wavescan-validation.herokuapp.com/validate 
-#sitelink - backend-imagelink(get): https://wavescan-validation.herokuapp.com/success
+frontend: https://ryanyakx.github.io/wavescan-frontend/ <br />
+backend-form(post): https://wavescan-validation.herokuapp.com/validate <br />
+backend-imagelink(get): https://wavescan-validation.herokuapp.com/success <br />
